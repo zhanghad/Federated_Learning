@@ -1,0 +1,59 @@
+{
+  "backprop" : true,
+  "backpropType" : "Standard",
+  "cacheMode" : "NONE",
+  "confs" : [ {
+    "cacheMode" : "NONE",
+    "epochCount" : 20,
+    "iterationCount" : 0,
+    "layer" : {
+      "@class" : "org.deeplearning4j.nn.conf.layers.OutputLayer",
+      "activationFn" : {
+        "@class" : "org.nd4j.linalg.activations.impl.ActivationIdentity"
+      },
+      "biasInit" : 0.0,
+      "biasUpdater" : null,
+      "constraints" : null,
+      "dist" : null,
+      "gradientNormalization" : "None",
+      "gradientNormalizationThreshold" : 1.0,
+      "hasBias" : true,
+      "idropout" : null,
+      "iupdater" : {
+        "@class" : "org.nd4j.linalg.learning.config.Sgd",
+        "learningRate" : 0.01
+      },
+      "l1" : 0.0,
+      "l1Bias" : 0.0,
+      "l2" : 0.0,
+      "l2Bias" : 0.0,
+      "layerName" : "layer0",
+      "lossFn" : {
+        "@class" : "org.nd4j.linalg.lossfunctions.impl.LossMSE",
+        "configProperties" : false,
+        "numOutputs" : -1
+      },
+      "nin" : 2,
+      "nout" : 1,
+      "pretrain" : false,
+      "weightInit" : "XAVIER",
+      "weightNoise" : null
+    },
+    "maxNumLineSearchIterations" : 5,
+    "miniBatch" : true,
+    "minimize" : true,
+    "optimizationAlgo" : "STOCHASTIC_GRADIENT_DESCENT",
+    "pretrain" : false,
+    "seed" : 12345,
+    "stepFunction" : null,
+    "variables" : [ "W", "b" ]
+  } ],
+  "epochCount" : 20,
+  "inferenceWorkspaceMode" : "ENABLED",
+  "inputPreProcessors" : { },
+  "iterationCount" : 200,
+  "pretrain" : false,
+  "tbpttBackLength" : 20,
+  "tbpttFwdLength" : 20,
+  "trainingWorkspaceMode" : "ENABLED"
+}

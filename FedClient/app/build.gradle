@@ -1,0 +1,94 @@
+apply plugin: 'com.android.application'
+
+// DL4J配置教学 https://deeplearning4j.konduit.ai/v/zhong-wen-v1.0.0/yi-dong-duan/android-xian-jue-tiao-jian
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion '30.0.1'
+
+    defaultConfig {
+        applicationId "com.fedclient"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            //由于DL4J的体积较大，因此开启代码缩减和资源缩减功能
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    //okhttp,gson,okio
+    implementation("com.squareup.okhttp3:okhttp:4.8.0")
+    implementation ('com.google.code.gson:gson:2.8.6')
+    implementation("com.squareup.okio:okio:2.7.0")
+
+    //java websocket
+    implementation "org.java-websocket:Java-WebSocket:1.5.1"
+
+    //DL4J的依赖配置
+    implementation (group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-beta6') {
+        exclude group: 'org.bytedeco', module: 'opencv-platform'
+        exclude group: 'org.bytedeco', module: 'leptonica-platform'
+        exclude group: 'org.bytedeco', module: 'hdf5-platform'
+        exclude group: 'org.nd4j', module: 'nd4j-base64'
+    }
+
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta6'
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta6', classifier: "android-arm"
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta6', classifier: "android-arm64"
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta6', classifier: "android-x86"
+    implementation group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta6', classifier: "android-x86_64"
+    implementation group: 'org.bytedeco', name: 'openblas', version: '0.3.9-1.5.3'
+    implementation group: 'org.bytedeco', name: 'openblas', version: '0.3.9-1.5.3', classifier: "android-arm"
+    implementation group: 'org.bytedeco', name: 'openblas', version: '0.3.9-1.5.3', classifier: "android-arm64"
+    implementation group: 'org.bytedeco', name: 'openblas', version: '0.3.9-1.5.3', classifier: "android-x86"
+    implementation group: 'org.bytedeco', name: 'openblas', version: '0.3.9-1.5.3', classifier: "android-x86_64"
+    implementation group: 'org.bytedeco', name: 'opencv', version: '4.3.0-1.5.3'
+    implementation group: 'org.bytedeco', name: 'opencv', version: '4.3.0-1.5.3', classifier: "android-arm"
+    implementation group: 'org.bytedeco', name: 'opencv', version: '4.3.0-1.5.3', classifier: "android-arm64"
+    implementation group: 'org.bytedeco', name: 'opencv', version: '4.3.0-1.5.3', classifier: "android-x86"
+    implementation group: 'org.bytedeco', name: 'opencv', version: '4.3.0-1.5.3', classifier: "android-x86_64"
+    implementation group: 'org.bytedeco', name: 'leptonica', version: '1.79.0-1.5.3'
+    implementation group: 'org.bytedeco', name: 'leptonica', version: '1.79.0-1.5.3', classifier: "android-arm"
+    implementation group: 'org.bytedeco', name: 'leptonica', version: '1.79.0-1.5.3', classifier: "android-arm64"
+    implementation group: 'org.bytedeco', name: 'leptonica', version: '1.79.0-1.5.3', classifier: "android-x86"
+    implementation group: 'org.bytedeco', name: 'leptonica', version: '1.79.0-1.5.3', classifier: "android-x86_64"
+
+    //lombok
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+
+    implementation('ch.qos.logback:logback-core:1.2.3')
+    implementation('ch.qos.logback:logback-classic:1.2.3')
+    //导入slf4j包，不导入这个包会报错：SLF4J: Failed to load class
+    //"org.slf4j.impl.StaticLoggerBinder"
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+
+
+
+}
