@@ -7,7 +7,7 @@
 
 在本地运行项目前需修改Android项目中的ws地址，将
 
-![image-20200728142745278](C:\Users\13102\AppData\Roaming\Typora\typora-user-images\image-20200728142745278.png)
+![image-20200728142745278](D:\github download\Federated_Learning-Project\image\image-20200728142745278.png)
 
 ```
 ws://192.168.1.4:8887/
@@ -72,15 +72,13 @@ ws://[本机内网ip]:8887/
 
 《Towards Federated Learning at Scale: System Design》
 
-![image-20200727145650894](C:\Users\13102\AppData\Roaming\Typora\typora-user-images\image-20200727145650894.png)
-
-
+![image-20200727145650894](D:\github download\Federated_Learning-Project\image\image-20200727145650894.png)
 
 **联邦学习中客户端与服务端的通信**
 
-![image-20200728122706459](C:\Users\13102\AppData\Roaming\Typora\typora-user-images\image-20200728122706459.png)
 
 
+![image-20200728122706459](D:\github download\Federated_Learning-Project\image\image-20200728122706459.png)
 
 ## start
 
@@ -160,7 +158,7 @@ server在收到本轮第一个更新的梯度后开始计时，超时的梯度�
 
 
 
-![image-20200728132844106](C:\Users\13102\AppData\Roaming\Typora\typora-user-images\image-20200728132844106.png)
+![image-20200728132844106](D:\github download\Federated_Learning-Project\image\image-20200728132844106.png)
 
 服务端可以同时执行多个联邦学习任务，每一个任务拥有独立的WebSocket服务，独立的端口。
 
