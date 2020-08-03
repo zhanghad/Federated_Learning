@@ -38,10 +38,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    //okhttp,gson,okio
+    //okhttp,gson,okio,fastjson
     implementation("com.squareup.okhttp3:okhttp:4.8.0")
     implementation ('com.google.code.gson:gson:2.8.6')
     implementation("com.squareup.okio:okio:2.7.0")
+    implementation ('com.alibaba:fastjson:1.1.72.android')
 
     //java websocket
     implementation "org.java-websocket:Java-WebSocket:1.5.1"

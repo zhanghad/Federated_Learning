@@ -41,12 +41,6 @@ public class WebController {
         return "success";
     }
 
-/*    @RequestMapping(value = "/model",method = RequestMethod.GET)
-    public byte[] model(@RequestBody String request){
-
-        return
-    }*/
-
 
     //json 解析
 

@@ -96,19 +96,20 @@ public class MultiRegression1 {
         System.out.println(net.gradient());
 
         //转为流
-        ByteBuffer byteBuffer=getByteBuffer(net.gradient());
+        ByteBuffer byteBuffer=getByteBuffer(net);
         System.out.println(byteBuffer);
+
         //转为对象
-        Object gradient=getObject(byteBuffer);
-        System.out.println(gradient);
+        Object newNet=getObject(byteBuffer);
+        System.out.println(newNet);
 
-        System.out.println(gradient.getClass());
-        System.out.println(((DefaultGradient) gradient).gradient());
+        System.out.println(newNet.getClass());
+        System.out.println((MultiLayerNetwork)newNet);
 
-        net.update((DefaultGradient)gradient);
+        net.update(((MultiLayerNetwork) newNet).gradient());
         System.out.println(net.gradient().getClass());
 
-        Map<String,INDArray> para=((DefaultGradient) gradient).gradientForVariable();
+        Map<String,INDArray> para=((MultiLayerNetwork) newNet).paramTable();
         System.out.println(para);
         System.out.println(net.gradient());
 

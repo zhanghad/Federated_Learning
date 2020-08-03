@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 public class WebSocketService extends Service {
 
     private static final String TAG = "WebSocketController";
-    public static final String wsUrl="ws://192.168.1.4:8887/";
+    public static final String wsUrl="ws://192.168.1.3:8887/";
     private FedWebSocketClient fedWebSocketClient;
 
 

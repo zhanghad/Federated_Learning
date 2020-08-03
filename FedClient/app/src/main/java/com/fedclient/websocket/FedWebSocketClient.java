@@ -6,6 +6,7 @@ import com.fedclient.Util.ByteBufferUtil;
 import com.fedclient.train.model.MultiRegression;
 
 import org.deeplearning4j.nn.gradient.DefaultGradient;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
@@ -67,28 +68,33 @@ public class FedWebSocketClient extends WebSocketClient {
     public void onMessage(String message) {
         //接收服务端指令
         if (message.equals(START_CODE)) {
-            try {
-                Log.i(TAG, "onMessage: startService " + START_CODE);
-                //等待接收全局梯度
-                while (!multiRegression.RECEIVED_GLOBAL) ;
-                multiRegression.RECEIVED_GLOBAL = false;
-                Log.i(TAG, "onMessage: RECEIVED_GLOBAL");
 
-                //用全局模型更新本地模型
-                //multiRegression.updateModel();
+            Log.i(TAG, "onMessage: startService " + START_CODE);
+            //等待接收全局梯度
+            while (!multiRegression.RECEIVED_GLOBAL) ;
+            multiRegression.RECEIVED_GLOBAL = false;
+            Log.i(TAG, "onMessage: RECEIVED_GLOBAL");
+            Log.i(TAG, "onMessage: " + multiRegression);
+            Log.i(TAG, "onMessage: " + multiRegression.getModel());
+
+            //用全局模型更新本地模型
+            try{
                 multiRegression.execute();
-
-                //上传梯度
-                try {
-                    ByteBuffer byteBuffer = ByteBufferUtil.getByteBuffer(multiRegression.getModel().gradient());
-                    send(byteBuffer);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "onMessage: local train failed");
+            }catch(Exception e){
                 e.printStackTrace();
             }
+
+
+            //上传模型
+            try {
+                System.out.println("上传模型");
+                ByteBuffer byteBuffer = ByteBufferUtil.getByteBuffer(multiRegression.getModel());
+                send(byteBuffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
         } else if (message.equals(STOP_CODE)) {
             //训练结束，服务器通知结束训练
             Log.i(TAG, "onMessage: train stop " + STOP_CODE);
@@ -102,24 +108,38 @@ public class FedWebSocketClient extends WebSocketClient {
     public void onMessage(ByteBuffer message) {
 
         Log.i(TAG, "onMessage: reveiving global");
-        if (message.position() != 0) {
-            //接收梯度
+/*        if (message.position() != 0) {
+            //接收全局模型
 
-            Object gradient = null;
+            Object model = null;
             try {
-                gradient = ByteBufferUtil.getObject(message);
+                model = ByteBufferUtil.getObject(message);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            //更新梯度
-            multiRegression.updateGradient((DefaultGradient) gradient);
-            //更新模型
-            multiRegression.updateModel();
+            //更新本地模型
+            Log.i(TAG, "onMessage: 更新本地模型");
+            multiRegression.updateModel((MultiLayerNetwork)model);
         } else {
             System.out.println(message);
+        }*/
+
+        Object model = null;
+        try {
+            model = ByteBufferUtil.getObject(message);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        //更新本地模型
+        Log.i(TAG, "onMessage: 更新本地模型");
+        multiRegression.updateModel((MultiLayerNetwork) model);
+
+        Log.i(TAG, "onMessage: RECEIVED_GLOBAL = true");
         multiRegression.RECEIVED_GLOBAL = true;
 
     }

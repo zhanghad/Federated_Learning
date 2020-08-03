@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.fedserver.Util.ByteBufferUtil;
 import org.deeplearning4j.nn.gradient.DefaultGradient;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.java_websocket.WebSocket;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.drafts.Draft_6455;
@@ -23,7 +24,20 @@ public class FedWebSocketServer extends WebSocketServer {
 
     private final ConcurrentHashMap<WebSocket,ClientInfo> webSocketSet = new ConcurrentHashMap<WebSocket,ClientInfo>();//在线连接
     private int onlineClientCount;//在线连接数
-    private final List<DefaultGradient> updateGradient=new ArrayList<DefaultGradient>();//更新的梯度的集合
+    //private final List<Map<String,INDArray>> updateWeight=new ArrayList<Map<String,INDArray>>();//更新的梯度的集合
+    private final List<MultiLayerNetwork> updateModel=new ArrayList<MultiLayerNetwork>();
+
+    public int getUpdateModelNum(){
+        return updateModel.size();
+    }
+
+    public List<MultiLayerNetwork> getUpdateModel() {
+        return updateModel;
+    }
+
+    public void clearUpdateModel(){
+        updateModel.clear();
+    }
 
 
     public int getOnlineClientCount(){
@@ -34,17 +48,17 @@ public class FedWebSocketServer extends WebSocketServer {
         return webSocketSet;
     }
 
-    public int getUpdateGradNum(){
-        return updateGradient.size();
+/*    public int getUpdateWeightNum(){
+        return updateWeight.size();
     }
 
-    public List<DefaultGradient> getUpdateGradient(){
-        return updateGradient;
+    public List<Map<String,INDArray>> getUpdateWeight(){
+        return updateWeight;
     }
 
-    public void clearUpdateGradient(){
-        updateGradient.clear();
-    }
+    public void clearUpdateWeight(){
+        updateWeight.clear();
+    }*/
 
     public void printAllClient(){
         Set<WebSocket> keySet=webSocketSet.keySet();
@@ -111,9 +125,13 @@ public class FedWebSocketServer extends WebSocketServer {
         WebSocketController.FIRST_UPDATE=true;
 
         //INDArray gradient=Nd4j.fromByteArray(message.array());
-        Object gradient= ByteBufferUtil.getObject(message);
-        updateGradient.add((DefaultGradient) gradient);
-        System.out.println(conn + " update gradient : \n" + gradient);
+        Object model= ByteBufferUtil.getObject(message);
+
+        //updateWeight.add((HashMap<String,INDArray>) weight);
+
+        updateModel.add((MultiLayerNetwork)model);
+
+        System.out.println(conn + " update model : \n" + model);
 
     }
 

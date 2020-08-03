@@ -2,18 +2,24 @@ package com.fedserver.train.model;
 
 import com.fedserver.train.Aggregator;
 import com.fedserver.train.FedModel;
+import com.oracle.deploy.update.UpdateCheck;
+import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.gradient.DefaultGradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import java.util.Map;
 import java.util.Random;
 
 public class MultiRegression extends Aggregator implements FedModel {
@@ -53,7 +59,15 @@ public class MultiRegression extends Aggregator implements FedModel {
                         .nIn(numInput).nOut(numOutputs).build())
                 .build()
         );
+
+        //UI界面
+        UIServer uiServer = UIServer.getInstance();
+        StatsStorage statsStorage = new InMemoryStatsStorage();
+        uiServer.attach(statsStorage);
+        globalModel.setListeners(new StatsListener(statsStorage));
+
         globalModel.init();
+
     }
 
     @Override
@@ -65,10 +79,6 @@ public class MultiRegression extends Aggregator implements FedModel {
         System.out.println(globalModel.gradient());
     }
 
-    @Override
-    public boolean updateGlobalGradient(DefaultGradient updateGradient) {
-        return super.updateGlobalGradient(updateGradient);
-    }
 
     @Override
     public MultiLayerNetwork getGlobalModel() {
@@ -76,10 +86,14 @@ public class MultiRegression extends Aggregator implements FedModel {
     }
 
     @Override
-    public DefaultGradient getGlobalGradient() {
-        return super.getGlobalGradient();
+    public boolean updateGlobalWeight(Map<String, INDArray> updateWeight) {
+        return super.updateGlobalWeight(updateWeight);
     }
 
+    @Override
+    public Map<String, INDArray> getGlobalWeight() {
+        return super.getGlobalWeight();
+    }
 
 
 }

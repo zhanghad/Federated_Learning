@@ -1,31 +1,29 @@
 package com.fedclient.train.model;
 
-import com.fedclient.train.UpdateGradient;
+import android.util.Log;
+
+import com.fedclient.train.MyMultiLayerNetwork;
 
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.gradient.DefaultGradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.Sgd;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
  * 多元线性回归
  * 拟合 y = a x1 + b x2 + c
  */
-public class MultiRegression extends UpdateGradient {
+public class MultiRegression extends MyMultiLayerNetwork{
+
+    private static final String TAG = "MultiRegression";
+    
     //随机数种子，用于结果复现
     private static final int seed = 12345;
     //对于每个miniBatch的迭代次数
@@ -46,28 +44,18 @@ public class MultiRegression extends UpdateGradient {
 
 
     public void execute(){
+        Log.i(TAG, "execute: ");
 
         //Generate the training data
         DataSetIterator iterator = getTrainingData(batchSize,rng);
 
-        //Create the network
-        int numInput = 2;
-        int numOutputs = 1;
-        model = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
-                .seed(seed)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .weightInit(WeightInit.XAVIER)
-                .updater(new Sgd(learningRate))
-                .list()
-                .layer(0, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                        .activation(Activation.IDENTITY)
-                        .nIn(numInput).nOut(numOutputs).build())
-                .build()
-        );
-        model.init();
         //监听器
-//        net.setListeners(new ScoreIterationListener(1));
+        model.init();
+        model.setListeners(new ScoreIterationListener(10));
 
+        Log.i(TAG, "execute: "+model);
+
+        Log.i(TAG, "execute: "+iterator);
         for( int i=0; i<nEpochs; i++ ){
             iterator.reset();
             model.fit(iterator);
@@ -101,13 +89,8 @@ public class MultiRegression extends UpdateGradient {
     }
 
     @Override
-    public void updateGradient(DefaultGradient globalGradient) {
-        super.updateGradient(globalGradient);
-    }
-
-    @Override
-    public void updateModel() {
-        super.updateModel();
+    public void updateModel(MultiLayerNetwork globalModel) {
+        super.updateModel(globalModel);
     }
 
     @Override
