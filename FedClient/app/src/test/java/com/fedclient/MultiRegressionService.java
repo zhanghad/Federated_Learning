@@ -7,7 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.fedclient.train.model.MultiRegression;
+import com.fed.train.model.MultiRegression;
 
 
 import org.nd4j.linalg.factory.Nd4j;

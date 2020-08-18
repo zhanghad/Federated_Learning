@@ -1,7 +1,5 @@
 package com.fedclient;
 
-import com.fedclient.train.model.MultiRegression;
-
 import org.junit.Test;
 
 import java.io.IOException;

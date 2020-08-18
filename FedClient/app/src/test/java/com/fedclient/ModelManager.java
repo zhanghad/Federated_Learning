@@ -2,7 +2,7 @@ package com.fedclient;
 
 import android.util.Log;
 
-import com.fedclient.train.model.MultiRegression;
+import com.fed.train.model.MultiRegression;
 
 public class ModelManager {
 

@@ -15,7 +15,7 @@
         <!--okhttp3 的配置，使其可使用http-->
 
 
-        <activity android:name=".MainActivity">
+        <activity android:name="com.fed.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -25,7 +25,7 @@
 
         <!--websocket服务-->
         <service
-            android:name=".websocket.WebSocketService"
+            android:name="com.fed.websocket.WebSocketService"
             android:enabled="true"
             android:exported="true" />
 
