@@ -133,6 +133,119 @@ server在收到本轮第一个更新的梯度后开始计时，超时的梯度�
 
 成功完成规定轮数后 server 会更新全局模型，生成最后的训练结果。
 
+
+
+# 网络协议（系统健壮性）
+
+## 用户设备限制
+
+### 客户端限制
+
+加入联邦学习的设备的硬件有以下几个方面的要求：
+
+- 网络 （wifi / 4G / 5G）
+- CPU （待定）
+- 内存（大于等于64G）
+- 电源（充电中）
+
+### 服务端客户选择
+
+根据用户的设备硬件水平，网络状态，**历史参与记录**择优选择以保证尽可能多的用户可以完成训练。
+
+
+
+## 心跳检测
+
+客户端与服务端定期发送心跳包以检查 WebSocket 长连接状态是否良好。
+
+- 心跳包内容
+- 发送间隔（小于1min）
+- 超时时长（待定）
+
+
+
+## 重连机制
+
+客户端在检测到连接异常（连接断开或连接不可用）后，会自动向服务端发起重连。
+
+![image-20200804114239056](image\image-20200804114239056.png)
+
+1. ### 感知何时需要重连
+
+   需要重连的场景有三种
+
+   ​	1.**连接断开**
+
+   ​	2.**连接未断但是不可用**
+
+   ​	3.**连接对端的服务失效**
+
+   
+
+   连接断开可以直接被检测到，检测到后直接发起重连。
+
+   后两种情况可以用心跳包来检测，如果客户端发送心跳包未在规定时间内收到服务端的回信，则可以判定为需要重连。
+
+   
+
+   定时发送心跳包的检测机制比较稳定，但是要想做到**快速检测**，就必须加快心跳包的发送频率，这样会加大网络的负担，因此心跳包检测作为一种保底的检测方案。
+
+   
+
+   ![image-20200804115157198](image\image-20200804115157198.png)
+
+   
+
+   
+
+   断网，切换网络是导致连接不可用的主要原因，所以设备的网络状态从offline到online大多数情况需要重连，因此在设备的网络状态从offline转到online时发送一次心跳包检测连接是否可用。
+
+   
+
+   ![image-20200804120016336](image\image-20200804120016336.png)
+
+   
+
+   
+
+   因此感知何时需要重连的方案为：
+
+   ​	1.**定期发送心跳包检测连接状态**
+
+   ​	2.**移动设备的网络状态由offline转为online时发送一次心跳包**
+
+   
+
+   
+
+2. ### 快速断开旧连接
+
+   在发起新连接前，必须断开旧连接，这样做一是为了避免误从旧连接收发数据，二是为了释放客户端和服务端的资源。
+
+   
+
+   TCP 的连接状态由服务端维持，因此大多数情况应由服务器断开连接。如果客户端想要断开连接，必须通知服务端，让其断开连接。
+
+   当旧连接可用时，客户端可以直接通知服务端断开连接；当旧连接不可用时，服务端将等到超时才会断开 TCP 连接。
+
+   
+
+   因为 TCP 协议无法修改，连接不可用时只能等待超时断开，因此要做到**快速断开旧连接**，就要在客户端应用逻辑上**直接将旧连接弃用**，并将其与新连接隔离，保证旧连接失效，不影响新连接的信息收发。
+
+   
+
+3. ### 快速发起新连接
+
+   当设备需要重连时，不可以直接发起重连，因为如果发生**网络抖动**时，所有设备同时发起重连，会给服务器带来很大的压力，因此要设计重连时的**退避算法**。
+
+   传输层的TCP协议已经有了指数回退算法，但是为了尽可能的避免同时重连，应用层也需要有退避算法。
+
+   算法的核心思想是使用随机数让设备推迟一段时间后再向服务器发起重连请求。不过对于网络状态从offline到online的设备，应该直接发起重连。
+
+   
+
+
+
 # 系统架构
 
 ![image-20200728121840839](image\image-20200728121840839.png)
@@ -165,6 +278,271 @@ server在收到本轮第一个更新的梯度后开始计时，超时的梯度�
 服务端可以同时执行多个联邦学习任务，每一个任务拥有独立的WebSocket服务，独立的端口。
 
 客户端在同一时间只可加入一个联邦学习任务。
+
+
+
+
+
+# 核心模块
+
+<img src="image\image-20200818152738382.png" alt="image-20200818152738382" style="zoom:67%;" />
+
+
+
+## 模型评价
+
+
+
+**分类模型的评价指标**
+
+- 真正例(True Positive, **TP**)：被模型预测为正的正样本；
+- 假正例(False Positive, **FP**)：被模型预测为正的负样本；
+- 假负例(False Negative, **FN**)：被模型预测为负的正样本；
+- 真负例(True Negative, **TN**)：被模型预测为负的负样本；
+
+
+
+- **正确率**（Accuracy）
+
+  ​	预测正确的结果占总样本的百分比
+  $$
+  Accuracy=\frac{TP+TN}{TP+TN+FP+FN}
+  $$
+  
+
+- **准确率**（Precision）
+
+  ​	在所有被预测为正的样本中实际为正的样本的概率
+  $$
+  Precision=\frac{TP}{TP+FP}
+  $$
+  
+
+- **召回率**（Recall）
+
+  ​	在实际为正的样本中被预测为正样本的概率
+  $$
+  Recall=\frac{TP}{TP+FN}
+  $$
+  
+
+- **F-Measure**
+
+  ​	准确率与召回率的加权调和平均
+
+$$
+F_β=\frac{(1+β^2)×P×R}{(β^2×P)+R}
+$$
+
+
+
+分类模型要如何评价？
+
+```java
+    public double evalModel(HashMap<String, INDArray> weight) {
+        MultiLayerNetwork tempModel=new MultiLayerNetwork(conf);
+        tempModel.init();
+        Evaluation eval = tempModel.evaluate(mnistTest);
+        //返回模型的正确率，值域 [0,1]
+        return eval.accuracy();
+    }
+```
+
+
+
+## 声誉机制
+
+### 声誉影响因素
+
+#### 参与者行为
+
+- **positive** 成功完成一轮训练并且模型精度达标
+- **uncertain**  中途退出训练
+- **negative** 成功完成一轮训练但模型精度未达标
+
+#### 时间
+
+- 时间越近的行为影响权重越大
+
+$$
+t(y)=Z^{y-start}\\\\
+Z\in(0,1)\\\\
+set\,Z=0.8
+$$
+
+```java
+    private double timeEffect(Date para){
+        //区分时间影响的最小单位为 min
+        double diff=(para.getTime()-startTime.getTime())/(1000.0*60);
+        return Math.pow(fadeWeight,diff);
+    }
+```
+
+
+
+### 服务端对参与者有三个评价值
+
+- **B (belief)** 信任
+- **D (disbelief)** 不信任
+- **U (uncertainty)** 不确定
+
+
+$$
+\left\{ 
+\begin{array}{c}
+B=P\cdot\frac {α\cdot\sum_{i=start}^{current} t(p_i)}{α\cdot\sum_{i=begin}^{current} t(p_i)+β\cdot\sum_{i=begin}^{current} t(n_i)} \\\\ 
+
+D=P\cdot\frac {β\cdot\sum_{i=start}^{current} t(n_i)}{α\cdot\sum_{i=begin}^{current} t(p_i)+β\cdot\sum_{i=begin}^{current} t(n_i)} \\\\ 
+
+U=(1-P)\cdot\sum_{i=start}^{current}t(u_i)
+\\\\
+
+P=\frac {\sum_{i=start}^{current} p_i+\sum_{i=start}^{current} n_i}{\sum_{i=begin}^{current} u_i+\sum_{i=begin}^{current}p_i+\sum_{i=begin}^{current}n_i} 
+\end{array}
+\right.\\\\
+set\,α=0.4\\\\
+set\,β=0.6\\\\
+$$
+
+
+
+### 声誉值：
+
+$$
+T=B+aU\\\\
+set\,a=0.5
+$$
+
+```java
+    //声誉得分
+    //声誉值取值范围 (0,1), 初始值为0.6
+    public double calculateReputation(){
+        double positiveEffect=0;
+        double negitiveEffect=0;
+        double uncertainEffect=0;
+        double belief;
+        double uncertainty;
+
+        for (Date date : positive) {
+            positiveEffect += timeEffect(date);
+        }
+        for (Date date : negative) {
+            negitiveEffect += timeEffect(date);
+        }
+        for (Date date : uncertain) {
+            uncertainEffect += timeEffect(date);
+        }
+
+        //belief 值
+        belief=successProbability()*positiveWeight*
+            positiveEffect/(positiveWeight*positiveEffect+negativeWeight*negitiveEffect);
+        //uncertainty 值
+        uncertainty=(1-successProbability())*uncertainEffect;
+        //用户信誉值
+        return belief+uncertainWeight*uncertainty;
+    }
+```
+
+
+
+## 用户评价
+
+声誉评分 && 设备硬件评分
+
+硬件：
+
+- CPU：CPU评分根据网络上的测评数据得到，测评信息存储在数据库中
+- RAM：根据RAM的容量大小评价
+- Storage：根据手机空余存储大小评价
+
+```java
+    private double ramScore(){
+        double limit=8.0;//ram容量满分为8GB
+        if(ram>=limit)
+            return 1.0;
+        else
+            return ram/limit;
+    }
+
+    private double storageScore(){
+        double limit=5.0;//storage容量满分5GB
+        if(ram>=limit)
+            return 1.0;
+        else
+            return ram/limit;
+    }
+```
+
+
+
+```java
+//设备硬件评价，值域 [0,1]
+public double getDeviceScore(){
+    return 0.8*cpuScore()+0.15*ramScore()+0.05*storageScore();
+}
+
+
+//用户总体评价, 值域 (0,1)
+public double getClientSocre(){
+    return 0.5*getDeviceScore()+0.5*clientReputation.calculateReputation();
+}
+```
+
+
+
+## 用户选择
+
+根据用户的评分选择单次全局迭代中的参与者
+
+```java
+    //根据用户的评分进行降序排序
+    private void sort(){
+        Collections.sort(clients, new Comparator<ClientInfo>() {
+            @Override
+            public int compare(ClientInfo o1, ClientInfo o2) {
+                return (int) (o2.getClientSocre()-o1.getClientSocre());
+            }
+        });
+    }
+
+
+    //用户选择
+    public ArrayList<ClientInfo> selectClients(int clientNum){
+        ArrayList<ClientInfo> selected=new ArrayList<ClientInfo>();
+        int i=0;
+        int j=0;
+        //排序
+        this.sort();
+        while(i<clients.size()){
+            //参与者上限
+            if(j==clientNum)
+                break;
+            //参与者声誉满足要求
+            if(clients.get(i).clientReputation.repuIsValid()){
+                selected.add(clients.get(i));
+                j++;
+            }
+            i++;
+        }
+        return selected;
+    }
+```
+
+
+
+## 用户激励
+
+- 参与者评分
+- 本轮模型评分
+
+```java
+//参与者奖励计算，单次奖励值域(0,1)
+public double getReword(double modelScore){
+    double reward=getClientSocre()*modelScore;
+    income+=reward;
+    return reward;
+}
+```
 
 
 
@@ -201,6 +579,12 @@ server在收到本轮第一个更新的梯度后开始计时，超时的梯度�
 
 
 
+
+
+
+
 ------
 
 Created by zhanghad. 2020/7/28
+
+Updated by zhanghad. 2020/8/18
