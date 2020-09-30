@@ -1,5 +1,13 @@
 [TOC]
 
+
+
+服务端地址：https://github.com/zhanghad/FedServer
+
+客户端地址：https://github.com/zhanghad/FedClient
+
+
+
 # 在自己的电脑上运行此项目
 
 - FedClient 为该项目的客户端，是 Android 类型的项目，使用Android Studio打开
@@ -579,6 +587,7 @@ public double getReword(double modelScore){
 
   - 系统需求分析
 - 系统设计
+  
   - 实现与部署
 - 测试及优化
 
