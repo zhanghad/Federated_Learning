@@ -6,7 +6,7 @@
 
 客户端地址：https://github.com/zhanghad/FedClient
 
-评价系统测试程序：https://github.com/apotoffish/virtualPlatform
+评价系统测试程序：https://github.com/apotoffish/vPlatform
 
 后台管理网页：https://github.com/zhr-1024/ManagePlatform
 
