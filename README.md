@@ -2,7 +2,9 @@
 
 
 
-服务端地址：https://github.com/zhanghad/FedServer
+服务端地址(测试)：https://github.com/zhanghad/FedServer
+
+服务端地址(基于ruoyi模板开发)：https://github.com/zhanghad/FedServer_RuoYi
 
 客户端地址：https://github.com/zhanghad/FedClient
 
