@@ -45,11 +45,11 @@ ws://[本机内网ip]:8887/
 
 
 
-
-
 # 系统整体架构
 
-![image-20200819093347233](image\image-20200819093347233.png)
+![image-20201020094150432](C:\Users\13102\AppData\Roaming\Typora\typora-user-images\image-20201020094150432.png)
+
+
 
 ## 移动端
 
