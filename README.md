@@ -1,5 +1,7 @@
 [TOC]
 
+本仓库为联邦学习系统的简要介绍，相关源码仓库如下：
+
 服务端地址：https://github.com/zhanghad/FedServer
 
 客户端地址：https://github.com/zhanghad/FedClient
