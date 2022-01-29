@@ -6,8 +6,6 @@
 
 客户端地址：https://github.com/zhanghad/FedClient
 
-评价系统测试平台：https://github.com/apotoffish/vPlatform
-
 
 
 # 系统整体架构
